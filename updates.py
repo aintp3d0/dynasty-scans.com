@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# __author__ = 'kira@-築城院 真鍳'
+# __author__ = 'ames0k0'
 
-from os import getcwd #-------------#
-from bs4 import BeautifulSoup as bs #
-from sys import path #--------------#
-from json import load, dump #-------#
-from os.path import exists, dirname #
-from requests import Session #------#
-
-path.append(dirname(getcwd()))
-from funcs.chunks import get_proxy ##
+from os import getcwd
+from bs4 import BeautifulSoup as bs
+from sys import path
+from json import load, dump
+from os.path import exists, dirname
+from requests import Session
 
 
 class Check:
@@ -30,11 +27,12 @@ class Check:
                       + UPD:  https://dynasty-scans.com/chapters/shouraiteki_ni_shindekure_ch04
                      ==================================================
     """
-    def __init__(self):
+    def __init__(self, proxy):
         self.file = "../../FILES/manga.json"
         self.base = "https://dynasty-scans.com"
         self.sess = Session()
-        self.sess.proxies = get_proxy(self.base)
+        if proxy:
+            self.sess.proxies = proxy
 
     def _ld(self):
         try:
@@ -125,5 +123,21 @@ class Check:
 
 
 if __name__ == "__main__":
-    ch = Check()
-    ch.main()
+    parser = ArgumentParser()
+    parser.add_argument("--http", help="http proxy: '{host}:{port}'")
+    parser.add_argument("--https", help="https proxy: '{host}:{port}'")
+    args = parser.parse_args()
+
+    proxy = args.http
+    if proxy:
+        proxy = {'http': proxy}
+    else:
+        proxy = args.https
+        if proxy:
+            proxy = {'https': proxy}
+
+    ch = Check(proxy)
+    try:
+        ch.main()
+    except KeyboardInterrupt:
+        pass

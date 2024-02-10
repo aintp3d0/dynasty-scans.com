@@ -1,0 +1,5 @@
+bs4==0.0.2
+img2pdf==0.5.1
+lxml==5.1.0
+pillow==10.2.0
+requests==2.31.0

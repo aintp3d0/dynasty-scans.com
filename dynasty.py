@@ -1,33 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# __author__ = 'kira@-築城院 真鍳'
+# __author__ = 'ames0k0'
 
-from os import remove, getcwd #--------#
-from sys import argv, path #-----------#
-from os.path import exists, dirname #--#
-from requests import Session #---------#
+from os import remove, getcwd, mkdir, chdir
+from sys import argv, path
+from os.path import exists, dirname
+from argparse import ArgumentParser
+from collections import Counter
+from urllib.request import urlretrieve
+from multiprocessing import Pool
 
-# https://github.com/hhiki/funcs
-path.append(dirname(getcwd()))
-from funcs.chunks import get_proxy, mkd #---#
-
-
-BASE = "https://dynasty-scans.com"
-SESS = Session()
-SESS.proxies = get_proxy(BASE)
-
-def get_soup(url):
-    return bs(SESS.get(url).text, 'lxml')
+from PIL import Image
+from bs4 import BeautifulSoup as bs
+from img2pdf import convert
+from requests import Session
 
 
-from PIL import Image #----------------#
-from bs4 import BeautifulSoup as bs #--#
-from img2pdf import convert #----------#
-from argparse import ArgumentParser #--#
-from collections import Counter #------#
-from urllib.request import urlretrieve #
-from multiprocessing import Pool #-----#
+def mkd(name):
+    if not exists(name):
+        mkdir(name)
+    chdir(name)
 
 
 class DynastyScan:
@@ -42,6 +35,16 @@ class DynastyScan:
         self.c = None
         self.s = None
         self.r = None
+
+
+    def init_session(self, proxy):
+        self.session = Session()
+        if proxy:
+            self.session.proxies = proxy
+
+
+    def get_soup(self, url):
+        return bs(self.session.get(url).text, 'lxml')
 
 
     def _rname(self, tar):
@@ -60,7 +63,7 @@ class DynastyScan:
 
     def get_manga_chapters(self, url):
         mkd(url.split('/')[-1])
-        soup = get_soup(url)
+        soup = self.get_soup(url)
         dd = soup.find('dl', 'chapter-list')
 
         for i in dd.find_all('a'):
@@ -86,7 +89,7 @@ class DynastyScan:
         for i in fm:
             img = Image.open(i)
             wid, hei = img.size
-            pics.append((wid, hei)) 
+            pics.append((wid, hei))
 
         most = Counter(pics).most_common(1) # [((1400, 2000), 4)]
         width =  most[0][0][0] # 1400
@@ -136,7 +139,7 @@ class DynastyScan:
                 chapter1_pic1.png
                 chapter2_pic1.png
         """
-        soup = get_soup(url)
+        soup = self.get_soup(url)
         k = soup.find_all('script')[1]
         f = str(k).split('var pages = ')[1].split(';')[0].split(',')
 
@@ -192,7 +195,9 @@ class DynastyScan:
         parser.add_argument("-m", help="manga with all chapters")
         parser.add_argument("-r", help="make 1 size for all images in pdf")
         parser.add_argument("-s", help="status: print info about downloaded pic")
-        args = args = parser.parse_args()
+        parser.add_argument("--http", help="http proxy: '{host}:{port}'")
+        parser.add_argument("--https", help="https proxy: '{host}:{port}'")
+        args = parser.parse_args()
 
         self.c = args.c
         self.m = args.m
@@ -201,6 +206,16 @@ class DynastyScan:
 
         if args.c == args.m == args.r:
             print('python3 dynasty.py -h')
+
+        proxy = args.http
+        if proxy:
+            proxy = {'http': proxy}
+        else:
+            proxy = args.https
+            if proxy:
+                proxy = {'https': proxy}
+
+        self.init_session(proxy)
 
 
     def main(self):
@@ -218,4 +233,7 @@ class DynastyScan:
 if __name__ == '__main__':
     yu = DynastyScan()
     yu._arguments()
-    yu.main()
+    try:
+        yu.main()
+    except KeyboardInterrupt:
+        pass
