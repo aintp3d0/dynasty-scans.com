@@ -50,7 +50,7 @@ class Check:
         with open(self.file, 'w') as f: dump(data, f)
 
     def _get_soup(self, url):
-        r = self.sess.get(url)
+        r = self.sess.get(url).text
         return bs(r, 'lxml')
 
     def gen_json(self):
