@@ -33,7 +33,7 @@ class Check:
                      ==================================================
     """
     def __init__(self, proxy):
-        self.file = f"{BASE_DIR}/manga.json"
+        self.file = "manga.json"
         self.base = "https://dynasty-scans.com"
         self.sess = Session()
         if proxy:
