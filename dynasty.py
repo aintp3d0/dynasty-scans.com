@@ -3,7 +3,7 @@
 
 # __author__ = 'ames0k0'
 
-from os import remove, getcwd, mkdir, chdir
+from os import remove
 from sys import argv, path
 from os.path import exists, dirname
 from argparse import ArgumentParser
@@ -17,10 +17,7 @@ from img2pdf import convert
 from requests import Session
 
 
-def mkd(name):
-    if not exists(name):
-        mkdir(name)
-    chdir(name)
+from utils import mkd
 
 
 class DynastyScan:

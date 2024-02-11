@@ -3,12 +3,17 @@
 
 # __author__ = 'ames0k0'
 
-from os import getcwd
 from bs4 import BeautifulSoup as bs
 from sys import path
 from json import load, dump
 from os.path import exists, dirname
 from requests import Session
+from argparse import ArgumentParser
+
+from utils import mkd
+
+
+BASE_DIR = 'Updates'
 
 
 class Check:
@@ -28,7 +33,7 @@ class Check:
                      ==================================================
     """
     def __init__(self, proxy):
-        self.file = "../../FILES/manga.json"
+        self.file = f"{BASE_DIR}/manga.json"
         self.base = "https://dynasty-scans.com"
         self.sess = Session()
         if proxy:
@@ -118,6 +123,7 @@ class Check:
         }.get(q, exit)()
 
     def main(self):
+        mkd(BASE_DIR)
         q = input('[c]eck | [a]dd | [d]el: ')
         self._call_func(q)
 
